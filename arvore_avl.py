@@ -50,19 +50,28 @@ class Leaf:
         return 1 + max(left_deep, right_deep)
 
     def rotate_to_left(self):
-        print(f"=============>{self.data}\n")
         self.data, self.right.data = self.right.data, self.data
+
         old_left = self.left
+        if old_left is not None:
+            old_left.father = self.right
+
         self.set_children(self.right, self.right.right)
         self.left.set_children(old_left, self.left.left)
+
         if self.right is not None:
             self.right.father = self
 
     def rotate_to_right(self):
         self.data, self.left.data = self.left.data, self.data
+
         old_right = self.right
+        if old_right is not None:
+            old_right.father = self.left
+
         self.set_children(self.left.left, self.left)
         self.right.set_children(self.right.right, old_right)
+
         if self.left is not None:
             self.left.father = self
 
@@ -92,6 +101,12 @@ class Leaf:
         return False
 
     def insert(self, data: int):
+        try:
+            self.find(data)
+        except Exception:
+            self.__insert(data)
+
+    def __insert(self, data: int):
         if data == self.data:
             return
 
@@ -139,8 +154,10 @@ class Leaf:
 
         if has_left and has_right:
             heir = leaf_to_remove.heir()
+            leaf_to_remove.tmp = leaf_to_remove.data
             leaf_to_remove.data = heir.data
             self.removeLeaf(heir)
+            leaf_to_remove.tmp = None
             return
 
         if leaf_to_remove.father is None:
@@ -148,6 +165,14 @@ class Leaf:
             return
 
         if not has_left and not has_right:
+            if leaf_to_remove.father.data == leaf_to_remove.data:
+                if leaf_to_remove.father.tmp < leaf_to_remove.data:
+                    leaf_to_remove.father.right = None
+                    return
+
+                leaf_to_remove.father.left = None
+                return
+
             if leaf_to_remove.father.data < leaf_to_remove.data:
                 leaf_to_remove.father.right = None
                 return
@@ -223,10 +248,12 @@ class Leaf:
 
 tree = Leaf(1)
 
+tree.display_tree()
+
 for i in range(100):
-    if i == 4:
-        tree.display_tree()
     tree.insert(i)
 
 tree.display_tree()
 tree.remove(43)
+tree.remove(44)
+tree.remove(45)
