@@ -7,6 +7,20 @@ class Leaf:
         self.right = None
         self.father = None
 
+    def __str__(self):
+        return self.describe_pre_order()
+
+    def describe_pre_order(self):
+        description = str(self.data)
+
+        if self.left is not None:
+            description += f"|{self.left.describe_pre_order()}"
+
+        if self.right is not None:
+            description += f"|{self.right.describe_pre_order()}"
+
+        return description
+
     def find(self, data):
         if data == self.data:
             return self
@@ -146,7 +160,6 @@ class Leaf:
 
     def remove(self, data: int):
         self.removeLeaf(self.find(data))
-        self.display_tree()
 
     def removeLeaf(self, leaf_to_remove):
         has_left = leaf_to_remove.left is not None
@@ -244,16 +257,3 @@ class Leaf:
         zipped_lines = zip(left, right)
         lines = [first_line, second_line] + [a + u * ' ' + b for a, b in zipped_lines]
         return lines, n + m + u, max(p, q) + 2, n + u // 2
-
-
-tree = Leaf(1)
-
-tree.display_tree()
-
-for i in range(100):
-    tree.insert(i)
-
-tree.display_tree()
-tree.remove(43)
-tree.remove(44)
-tree.remove(45)
