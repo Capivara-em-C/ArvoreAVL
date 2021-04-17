@@ -5,12 +5,28 @@ class Leaf:
         self.data = data
         self.left = None
         self.right = None
+        self.father = None
+
+    def find(self, data):
+        if data == self.data:
+            return self
+
+        if data < self.data:
+            if self.left is None:
+                raise Exception("Not found")
+
+            return self.left.find(data)
+
+        if self.right is None:
+            raise Exception("Not found")
+
+        return self.right.find(data)
 
     def set_children(self, left=None, right=None):
         self.left = left
         self.right = right
 
-    def equalize_number(self):
+    def normalize_number(self):
         left_deep = 0
         if self.left:
             left_deep = self.left.find_deep()
@@ -34,16 +50,21 @@ class Leaf:
         return 1 + max(left_deep, right_deep)
 
     def rotate_to_left(self):
+        print(f"=============>{self.data}\n")
         self.data, self.right.data = self.right.data, self.data
         old_left = self.left
         self.set_children(self.right, self.right.right)
         self.left.set_children(old_left, self.left.left)
+        if self.right is not None:
+            self.right.father = self
 
     def rotate_to_right(self):
         self.data, self.left.data = self.left.data, self.data
         old_right = self.right
         self.set_children(self.left.left, self.left)
         self.right.set_children(self.right.right, old_right)
+        if self.left is not None:
+            self.left.father = self
 
     def rotate_to_left_right(self):
         self.left.rotate_to_left()
@@ -53,16 +74,16 @@ class Leaf:
         self.right.rotate_to_right()
         self.rotate_to_left()
 
-    def equalize(self):
-        equalizer_number = self.equalize_number()
-        if equalizer_number > 1:
-            if self.left.equalize_number() > 0:
+    def normalize(self):
+        normalize_number = self.normalize_number()
+        if normalize_number > 1:
+            if self.left.normalize_number() > 0:
                 self.rotate_to_right()
                 return True
 
             self.rotate_to_left_right()
-        elif equalizer_number < -1:
-            if self.right.equalize_number() < 0:
+        elif normalize_number < -1:
+            if self.right.normalize_number() < 0:
                 self.rotate_to_left()
                 return True
 
@@ -70,33 +91,84 @@ class Leaf:
 
         return False
 
-    def insert(self, data):
+    def insert(self, data: int):
         if data == self.data:
             return
 
-        if data <= self.data:
+        if data < self.data:
             if not self.left:
                 self.left = Leaf(data)
-                self.equalize()
+                self.left.father = self
+                self.normalize()
                 return
 
             self.left.insert(data)
-            self.equalize()
+            self.normalize()
             return
 
         if not self.right:
             self.right = Leaf(data)
-            self.equalize()
+            self.right.father = self
+            self.normalize()
             return
 
         self.right.insert(data)
-        self.equalize()
+        self.normalize()
 
-    def get_displayed_three(self):
+    def heir(self):
+        if self.right is not None:
+            heir = self.right
+            while heir.left is not None:
+                heir = heir.left
+
+            return heir
+
+        heir = self.left
+        while heir.right is not None:
+            heir = heir.right
+
+        return heir
+
+    def remove(self, data: int):
+        self.removeLeaf(self.find(data))
+        self.display_tree()
+
+    def removeLeaf(self, leaf_to_remove):
+        has_left = leaf_to_remove.left is not None
+        has_right = leaf_to_remove.right is not None
+
+        if has_left and has_right:
+            heir = leaf_to_remove.heir()
+            leaf_to_remove.data = heir.data
+            self.removeLeaf(heir)
+            return
+
+        if leaf_to_remove.father is None:
+            del leaf_to_remove
+            return
+
+        if not has_left and not has_right:
+            if leaf_to_remove.father.data < leaf_to_remove.data:
+                leaf_to_remove.father.right = None
+                return
+
+            leaf_to_remove.father.left = None
+            return
+
+        heir = leaf_to_remove.heir()
+        if heir.father.data < heir.data:
+            leaf_to_remove.rotate_to_left()
+            self.removeLeaf(heir)
+            return
+
+        leaf_to_remove.rotate_to_right()
+        self.removeLeaf(leaf_to_remove)
+
+    def get_displayed_tree(self):
         lines, *_ = self.display_aux()
         return lines
     
-    def display_three(self):
+    def display_tree(self):
         lines, *_ = self.display_aux()
         for line in lines:
             print(line)
@@ -147,3 +219,14 @@ class Leaf:
         zipped_lines = zip(left, right)
         lines = [first_line, second_line] + [a + u * ' ' + b for a, b in zipped_lines]
         return lines, n + m + u, max(p, q) + 2, n + u // 2
+
+
+tree = Leaf(1)
+
+for i in range(100):
+    if i == 4:
+        tree.display_tree()
+    tree.insert(i)
+
+tree.display_tree()
+tree.remove(43)
