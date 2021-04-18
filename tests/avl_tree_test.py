@@ -25,9 +25,8 @@ class TestTreeAVL(unittest.TestCase):
         self.assertEqual('1|0|2', str(tree), 'Insertion of element that already exist in tree (left leaf)')
 
         tree.insert(3)
-        self.assertEqual('1|0|2|3', str(tree), 'Insertion of element that already exist in tree (left leaf)')
+        self.assertEqual('1|0|2|3', str(tree), 'Insertion of leaf in left of left leaf of root')
 
-        tree.insert(3)
         tree.insert(4)
         self.assertEqual('1|0|3|2|4', str(tree), 'Insertion of element that will execute normalization in tree')
 

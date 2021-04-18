@@ -105,12 +105,15 @@ class Leaf:
                 return True
 
             self.rotate_to_left_right()
-        elif normalize_number < -1:
+            return True
+
+        if normalize_number < -1:
             if self.right.normalize_number() < 0:
                 self.rotate_to_left()
                 return True
 
             self.rotate_to_right_left()
+            return True
 
         return False
 
