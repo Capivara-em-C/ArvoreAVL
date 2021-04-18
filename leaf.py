@@ -165,19 +165,11 @@ class Leaf:
         has_left = leaf_to_remove.left is not None
         has_right = leaf_to_remove.right is not None
 
-        if has_left and has_right:
-            heir = leaf_to_remove.heir()
-            leaf_to_remove.tmp = leaf_to_remove.data
-            leaf_to_remove.data = heir.data
-            self.removeLeaf(heir)
-            leaf_to_remove.tmp = None
-            return
-
-        if leaf_to_remove.father is None:
-            del leaf_to_remove
-            return
-
         if not has_left and not has_right:
+            if leaf_to_remove.father is None:
+                del leaf_to_remove
+                return
+
             if leaf_to_remove.father.data == leaf_to_remove.data:
                 if leaf_to_remove.father.tmp < leaf_to_remove.data:
                     leaf_to_remove.father.right = None
@@ -194,13 +186,10 @@ class Leaf:
             return
 
         heir = leaf_to_remove.heir()
-        if heir.father.data < heir.data:
-            leaf_to_remove.rotate_to_left()
-            self.removeLeaf(heir)
-            return
-
-        leaf_to_remove.rotate_to_right()
-        self.removeLeaf(leaf_to_remove)
+        leaf_to_remove.tmp = leaf_to_remove.data
+        leaf_to_remove.data = heir.data
+        self.removeLeaf(heir)
+        leaf_to_remove.tmp = None
 
     def get_displayed_tree(self):
         lines, *_ = self.display_aux()
